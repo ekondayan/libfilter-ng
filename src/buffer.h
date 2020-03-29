@@ -61,7 +61,10 @@ namespace buffer
 {
     // CONFIGURATION PARAMETERS
 
-    //
+    /* Enable/Disable exceptions throwing from the constructor. For some MCU
+     * this may be expensive operation. If you disable the exceptions, you
+     * will have to manually check if the buffer object is valid
+     */
     constexpr bool use_exceptions = false;
 
     /***********************************************************************/
@@ -115,7 +118,7 @@ namespace buffer
     Buffer<data_t, uint_t>::Buffer():
         Buffer(nullptr, 0)
     {
-        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
+        static_assert (std::is_unsigned_v<uint_t>, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template<class data_t, class uint_t>
@@ -125,7 +128,7 @@ namespace buffer
         m_buffer_head(0),
         m_buffer_count(0),
         m_buffer(nullptr),
-        m_safe_erase(false)
+        m_safe_erase(safe_erase)
     {
         if(size <= 3)
         {
@@ -154,7 +157,6 @@ namespace buffer
 
         m_buffer_mask = buffer ? size - 1 : 0;
         m_buffer = buffer;
-        m_safe_erase = safe_erase;
 
         if(m_safe_erase)
             erase();

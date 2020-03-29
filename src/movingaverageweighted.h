@@ -64,6 +64,8 @@ namespace filter
             void reset(data_t *buffer, uint_t buffer_size);
             void reset();
 
+            using buffer::Buffer<data_t, uint_t>::valid;
+
         private:
             uint_t m_triangular_number;
     };
@@ -77,7 +79,7 @@ namespace filter
         buffer::Buffer<data_t, uint_t>(buffer, buffer_size),
         m_triangular_number(((buffer_size-1)*buffer_size)/2)
     {
-        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
+        static_assert (std::is_unsigned_v<uint_t>, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template<class data_t, class uint_t>

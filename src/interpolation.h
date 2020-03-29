@@ -87,7 +87,7 @@ namespace filter
         m_interpolation_point_size(size),
         m_raw_value(data_t())
     {
-        static_assert (std::is_unsigned<uint_t>::value, "");
+        static_assert (std::is_unsigned_v<uint_t>, "");
     }
 
     template<class data_t, class uint_t>

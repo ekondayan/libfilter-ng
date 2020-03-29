@@ -77,6 +77,8 @@ namespace filter
             void in(const data_t &value);
             void reset(data_t *buffer, uint_t buffer_size);
             void reset();
+
+            using buffer::Buffer<data_t, uint_t>::valid;
     };
 
     /***********************************************************************/
@@ -87,7 +89,7 @@ namespace filter
     MovingMedian<data_t, uint_t>::MovingMedian(data_t *buffer, uint_t buffer_size):
         buffer::Buffer<data_t, uint_t>(buffer, buffer_size)
     {
-        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
+        static_assert (std::is_unsigned_v<uint_t>, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template<class data_t, class uint_t>

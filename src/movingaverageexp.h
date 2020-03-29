@@ -91,7 +91,7 @@ namespace filter
         m_alpha(2.0F / (periods + 1)),
         m_first_value_offset(++first_value_offset)
     {
-        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
+        static_assert (std::is_unsigned_v<uint_t>, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template<class data_t, class uint_t>

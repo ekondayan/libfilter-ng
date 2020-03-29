@@ -29,7 +29,7 @@
  *
  * PROS
  * ----
-* 1. The returned value is a value from the buffer
+* 1. The returned value is a real value from the buffer
 * 2. Good for steady signal
 * 3. Removes outliers
  *
@@ -77,6 +77,8 @@ namespace filter
             void reset(data_t *buffer, Occurance *occurance_buffer, uint_t buffer_size);
             void reset();
 
+            using buffer::Buffer<data_t, uint_t>::valid;
+
         private:
             Occurance *m_occurance_buffer;
     };
@@ -90,7 +92,7 @@ namespace filter
         buffer::Buffer<data_t, uint_t>(buffer, buffer_size),
         m_occurance_buffer(occurance_buffer)
     {
-        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
+        static_assert (std::is_unsigned_v<uint_t>, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template<class data_t, class uint_t>

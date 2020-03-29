@@ -74,6 +74,8 @@ namespace filter
             void reset(data_t *buffer, uint_t buffer_size, uint_t er_periods, uint_t slow_periods, uint_t fast_periods);
             void reset();
 
+            using buffer::Buffer<data_t, uint_t>::valid;
+
         private:
             data_t abs(const data_t &value);
 
@@ -96,7 +98,7 @@ namespace filter
         m_fast_periods(fast_periods),
         m_kama(data_t())
     {
-        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
+        static_assert (std::is_unsigned_v<uint_t>, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template<class data_t, class uint_t>
