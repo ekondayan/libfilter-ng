@@ -120,12 +120,12 @@ namespace buffer
 
     template<class data_t, class uint_t>
     Buffer<data_t, uint_t>::Buffer(data_t* buffer, uint_t size, bool safe_erase):
-        m_buffer_mask(buffer ? size - 1 : 0),
+        m_buffer_mask(0),
         m_buffer_tail(0),
         m_buffer_head(0),
         m_buffer_count(0),
-        m_buffer(buffer),
-        m_safe_erase(safe_erase)
+        m_buffer(nullptr),
+        m_safe_erase(false)
     {
         if(size <= 3)
         {
@@ -152,7 +152,12 @@ namespace buffer
 
         }
 
-        if(m_safe_erase) erase();
+        m_buffer_mask = buffer ? size - 1 : 0;
+        m_buffer = buffer;
+        m_safe_erase = safe_erase;
+
+        if(m_safe_erase)
+            erase();
     }
 
     template<class data_t, class uint_t>
