@@ -1,13 +1,13 @@
 /*
- * 
- *  _   _   _        __   _   _   _                                         
- * | | (_) | |__    / _| (_) | | | |_    ___   _ __           _ __     __ _ 
+ *
+ *  _   _   _        __   _   _   _
+ * | | (_) | |__    / _| (_) | | | |_    ___   _ __           _ __     __ _
  * | | | | | '_ \  | |_  | | | | | __|  / _ \ | '__|  _____  | '_ \   / _` |
  * | | | | | |_) | |  _| | | | | | |_  |  __/ | |    |_____| | | | | | (_| |
  * |_| |_| |_.__/  |_|   |_| |_|  \__|  \___| |_|            |_| |_|  \__, |
- *                                                                    |___/ 
+ *                                                                    |___/
  *
- * A self contained, header only library providing a set of filters 
+ * A self contained, header only library providing a set of filters
  * written in C++ with efficiency in mind
  *
  * Version: 1.0.0
@@ -18,12 +18,8 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
-#ifndef BUFFER_H
-#define BUFFER_H
-
-/*
+ *
+ *
  * DESCRIPTION
  * -----------
  * Circular buffer optimized for speed. Pushing, poping and rotating use cheap
@@ -55,26 +51,37 @@
  *          This type should be chosen carefully based on the CPU/MCU for optimal performance.
  */
 
+#ifndef BUFFER_H
+#define BUFFER_H
+
+#include <type_traits>
+#include <stdexcept>
+
 namespace buffer
 {
+    // CONFIGURATION PARAMETERS
+
+    //
+    constexpr bool use_exceptions = false;
+
     /***********************************************************************/
     /***************************** Definition ******************************/
     /***********************************************************************/
 
-    template <class data_t, class uint_t =  = unsigned short int> class Buffer
+    template <class data_t, class uint_t = unsigned short int> class Buffer
     {
         public:
             Buffer();
-            Buffer(data_t *buffer, uint_t size, bool safe_erase = false);
+            Buffer(data_t* buffer, uint_t size, bool safe_erase = false);
             ~Buffer();
 
-            inline Buffer &init(data_t *buffer = nullptr, uint_t size = 0, bool safe_erase = false);
-            inline Buffer &pushFront(const data_t &value);
-            inline Buffer &pushBack(const data_t &value);
-            inline Buffer &popFront(data_t *value = nullptr);
-            inline Buffer &popBack(data_t *value = nullptr);
-            inline Buffer &clear();
-            inline Buffer *getPtr();
+            inline Buffer& init(data_t* buffer = nullptr, uint_t size = 0, bool safe_erase = false);
+            inline Buffer& pushFront(const data_t& value);
+            inline Buffer& pushBack(const data_t& value);
+            inline Buffer& popFront(data_t* value = nullptr);
+            inline Buffer& popBack(data_t* value = nullptr);
+            inline Buffer& clear();
+            inline Buffer* getPtr();
             inline bool full();
             inline bool empty();
             inline bool valid();
@@ -84,19 +91,19 @@ namespace buffer
             inline data_t last();
             inline void erase();
             inline data_t at(uint_t index);
-            inline Buffer &rotateForeward();
-            inline Buffer &rotateBackward();
-            inline void copyToArray(data_t *array, uint_t start = 0, uint_t count = 0);
-            inline data_t &operator[](uint_t index);
-            inline Buffer &operator<<(const data_t &value);
-            inline Buffer &operator>>(data_t &value);
+            inline Buffer& rotateForeward();
+            inline Buffer& rotateBackward();
+            inline void copyToArray(data_t* array, uint_t start = 0, uint_t count = 0);
+            inline data_t& operator[](uint_t index);
+            inline Buffer& operator<<(const data_t& value);
+            inline Buffer& operator>>(data_t& value);
 
         private:
             uint_t m_buffer_mask;
             uint_t m_buffer_tail;
             uint_t m_buffer_head;
             uint_t m_buffer_count;
-            data_t *m_buffer;
+            data_t* m_buffer;
             bool   m_safe_erase;
     };
 
@@ -108,34 +115,61 @@ namespace buffer
     Buffer<data_t, uint_t>::Buffer():
         Buffer(nullptr, 0)
     {
+        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t>::Buffer(data_t *buffer, uint_t size, bool safe_erase):
-        m_buffer_mask(buffer?size-1:0),
+    Buffer<data_t, uint_t>::Buffer(data_t* buffer, uint_t size, bool safe_erase):
+        m_buffer_mask(buffer ? size - 1 : 0),
         m_buffer_tail(0),
         m_buffer_head(0),
         m_buffer_count(0),
         m_buffer(buffer),
         m_safe_erase(safe_erase)
     {
+        if(size <= 3)
+        {
+            if constexpr(use_exceptions)
+            {
+                throw std::invalid_argument("Size of the buffer must be greater than 3");
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        if(size & (size - 1))
+        {
+            if constexpr(use_exceptions)
+            {
+                throw std::invalid_argument("Size of the buffer must a power of two(4, 8, 16, 32, ...)");
+            }
+            else
+            {
+                return;
+            }
+
+        }
+
         if(m_safe_erase) erase();
     }
 
     template<class data_t, class uint_t>
     Buffer<data_t, uint_t>::~Buffer()
     {
-        if(m_safe_erase) erase();
+        if(m_safe_erase)
+            erase();
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> *Buffer<data_t, uint_t>::getPtr()
+    Buffer<data_t, uint_t>* Buffer<data_t, uint_t>::getPtr()
     {
         return m_buffer;
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> &Buffer<data_t, uint_t>::init(data_t *buffer, uint_t size, bool safe_erase)
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::init(data_t* buffer, uint_t size, bool safe_erase)
     {
         // Reset the buffer indexes
         m_buffer_tail = 0;
@@ -143,10 +177,10 @@ namespace buffer
         m_buffer_count = 0;
         m_safe_erase = safe_erase;
 
-        // If it is the same buffer, erase it if necessary
+        // If the buffer is not the same
         if(buffer != m_buffer)
         {
-            // Do not use a buffer and clear the member variables
+            // If nullptr passed as buffer pointer, then clear the member variables
             if(buffer == nullptr)
             {
                 m_buffer_mask = 0;
@@ -159,55 +193,65 @@ namespace buffer
             }
         }
 
-        if(m_safe_erase) erase();
+        // Erase the buffer if necessary
+        if(m_safe_erase)
+            erase();
 
         return *this;
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> &Buffer<data_t, uint_t>::pushFront(const data_t &value)
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::pushFront(const data_t &value)
     {
-        if(m_buffer == nullptr) return *this;
+        if(m_buffer == nullptr)
+            return *this;
 
         m_buffer[m_buffer_head] = value;
         (++m_buffer_head) &= m_buffer_mask;
-        if(m_buffer_head==m_buffer_tail) ++m_buffer_tail &= m_buffer_mask;
+        if(m_buffer_head==m_buffer_tail)
+            ++m_buffer_tail &= m_buffer_mask;
         else ++m_buffer_count;
 
         return *this;
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> &Buffer<data_t, uint_t>::pushBack(const data_t &value)
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::pushBack(const data_t& value)
     {
-        if(m_buffer == nullptr) return *this;
+        if(m_buffer == nullptr)
+            return *this;
 
         (--m_buffer_tail) &= m_buffer_mask;
         m_buffer[m_buffer_tail] = value;
-        if(m_buffer_head==m_buffer_tail) (--m_buffer_head) &= m_buffer_mask;
+        if(m_buffer_head==m_buffer_tail)
+            (--m_buffer_head) &= m_buffer_mask;
         else ++m_buffer_count;
 
         return *this;
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> &Buffer<data_t, uint_t>::popFront(data_t *value)
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::popFront(data_t* value)
     {
-        if(m_buffer == nullptr || m_buffer_tail == m_buffer_head) return *this;
+        if(m_buffer == nullptr || m_buffer_tail == m_buffer_head)
+            return *this;
 
         (--m_buffer_head) &= m_buffer_mask;
-        if(value) *value = m_buffer[m_buffer_head];
+        if(value)
+            *value = m_buffer[m_buffer_head];
         --m_buffer_count;
 
         return *this;
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> &Buffer<data_t, uint_t>::popBack(data_t *value)
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::popBack(data_t* value)
     {
-        if(m_buffer == nullptr || m_buffer_tail == m_buffer_head) return *this;
+        if(m_buffer == nullptr || m_buffer_tail == m_buffer_head)
+            return *this;
 
-        if(value) *value = m_buffer[m_buffer_tail];
+        if(value)
+            *value = m_buffer[m_buffer_tail];
         (++m_buffer_tail) &= m_buffer_mask;
         --m_buffer_count;
 
@@ -215,13 +259,14 @@ namespace buffer
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> &Buffer<data_t, uint_t>::clear()
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::clear()
     {
         m_buffer_tail = 0;
         m_buffer_head = 0;
         m_buffer_count = 0;
 
-        if(m_safe_erase) erase();
+        if(m_safe_erase)
+            erase();
 
         return *this;
     }
@@ -259,21 +304,24 @@ namespace buffer
     template<class data_t, class uint_t>
     data_t Buffer<data_t, uint_t>::first()
     {
-        if(m_buffer == nullptr || m_buffer_head == m_buffer_tail) return data_t();
+        if(m_buffer == nullptr || m_buffer_head == m_buffer_tail)
+            return data_t();
         return m_buffer[(m_buffer_head-1) & m_buffer_mask];
     }
 
     template<class data_t, class uint_t>
     data_t Buffer<data_t, uint_t>::last()
     {
-        if(m_buffer == nullptr || m_buffer_head == m_buffer_tail) return data_t();
+        if(m_buffer == nullptr || m_buffer_head == m_buffer_tail)
+            return data_t();
         return m_buffer[m_buffer_tail];
     }
 
     template<class data_t, class uint_t>
     void Buffer<data_t, uint_t>::erase()
     {
-        if(m_buffer == nullptr) return;
+        if(m_buffer == nullptr)
+            return;
 
         for(uint_t i = 0; i<m_buffer_mask+1; ++i) m_buffer[i] = data_t();
     }
@@ -281,15 +329,17 @@ namespace buffer
     template<class data_t, class uint_t>
     data_t Buffer<data_t, uint_t>::at(uint_t index)
     {
-        if(m_buffer == nullptr || index > (m_buffer_count - 1)) return data_t();
+        if(m_buffer == nullptr || index > (m_buffer_count - 1))
+            return data_t();
         return m_buffer[(m_buffer_head - 1 - index) & m_buffer_mask];
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> &Buffer<data_t, uint_t>::rotateForeward()
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::rotateForeward()
     {
         // Should rotate only full buffer
-        if(m_buffer_count!=m_buffer_mask) return *this;
+        if(m_buffer_count!=m_buffer_mask)
+            return *this;
 
         // Swap tail and head elements. This is necessary because head is pointing to an invalid element
         data_t tmp_swap = m_buffer[m_buffer_head];
@@ -303,10 +353,11 @@ namespace buffer
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> &Buffer<data_t, uint_t>::rotateBackward()
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::rotateBackward()
     {
         // Should rotate only full buffer
-        if(m_buffer_count!=m_buffer_mask) return *this;
+        if(m_buffer_count!=m_buffer_mask)
+            return *this;
 
         // Swap head and the first elements. This is necessary because head is pointing to an invalid element
         data_t tmp_swap = m_buffer[(m_buffer_head - 1) & m_buffer_mask];
@@ -323,29 +374,34 @@ namespace buffer
     // !!! IMPORTANT - OPTIMIZE FOR SPEED !!!
     // !!! IMPORTANT - OPTIMIZE FOR SPEED !!!
     template<class data_t, class uint_t>
-    void Buffer<data_t, uint_t>::copyToArray(data_t *array, uint_t start, uint_t count)
+    void Buffer<data_t, uint_t>::copyToArray(data_t* array, uint_t start, uint_t count)
     {
         // Pointers must be set
-        if(m_buffer == nullptr || array == nullptr) return;
+        if(m_buffer == nullptr || array == nullptr)
+            return;
         // Buffer must not be empty
-        else if(m_buffer_head == m_buffer_tail) return;
+        else if(m_buffer_head == m_buffer_tail)
+            return;
         // Can not access elements outside array boundaries
-        else if((start+count)>(m_buffer_count-1)) return;
+        else if((start+count)>(m_buffer_count-1))
+            return;
 
         uint_t last_index = start + count;
-        if(count == 0) last_index = m_buffer_count ;
+        if(count == 0)
+            last_index = m_buffer_count ;
 
-        for(uint_t i = start; i < last_index; ++i) array[i] = m_buffer[(m_buffer_head - 1 - i) & m_buffer_mask];
+        for(uint_t i = start; i < last_index; ++i)
+            array[i] = m_buffer[(m_buffer_head - 1 - i) & m_buffer_mask];
     }
 
     template<class data_t, class uint_t>
-    data_t &Buffer<data_t, uint_t>::operator[](uint_t index)
+    data_t& Buffer<data_t, uint_t>::operator[](uint_t index)
     {
         return m_buffer[(m_buffer_head - 1 - index) & m_buffer_mask];
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> &Buffer<data_t, uint_t>::operator<<(const data_t &value)
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::operator<<(const data_t &value)
     {
         pushFront(value);
         return *this;

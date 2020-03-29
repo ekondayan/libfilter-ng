@@ -18,12 +18,8 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
-#ifndef INTERVALMEDIAN_H
-#define INTERVALMEDIAN_H
-
-/*
+ *
+ *
  * DESCRIPTION
  * -----------
  * Get the median value in the buffer.
@@ -60,6 +56,10 @@
  * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
  */
 
+#ifndef INTERVALMEDIAN_H
+#define INTERVALMEDIAN_H
+
+#include <type_traits>
 #include "buffer.h"
 
 namespace filter
@@ -91,7 +91,7 @@ namespace filter
         buffer::Buffer<data_t, uint_t>(buffer, buffer_size),
         m_median(data_t())
     {
-
+        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template<class data_t, class uint_t>

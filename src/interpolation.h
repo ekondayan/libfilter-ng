@@ -18,12 +18,8 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
-#ifndef INTERPOLATION_H
-#define INTERPOLATION_H
-
-/*
+ *
+ *
  * DESCRIPTION
  * -----------
  *
@@ -45,6 +41,11 @@
  * data_t - Type of the data, the filter will work with
  * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
  */
+
+#ifndef INTERPOLATION_H
+#define INTERPOLATION_H
+
+#include <type_traits>
 
 namespace filter
 {
@@ -86,7 +87,7 @@ namespace filter
         m_interpolation_point_size(size),
         m_raw_value(data_t())
     {
-
+        static_assert (std::is_unsigned<uint_t>::value, "");
     }
 
     template<class data_t, class uint_t>

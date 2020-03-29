@@ -18,12 +18,8 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
-#ifndef HIPASS_H
-#define HIPASS_H
-
-/*
+ *
+ *
  * DESCRIPTION
  * -----------
  *
@@ -46,6 +42,11 @@
  * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
  */
 
+#ifndef HIPASS_H
+#define HIPASS_H
+
+#include <type_traits>
+
 namespace filter
 {
     /***********************************************************************/
@@ -58,7 +59,7 @@ namespace filter
         public:
             HiPass(float alpha, uint_t offset = 0);
             data_t out();
-            void in(const data_t &value);
+            void in(const data_t& value);
             void reset(float alpha, uint_t offset);
             void reset();
 
@@ -80,7 +81,7 @@ namespace filter
         m_first_value_offset(offset + 2),
         m_value_last(data_t())
     {
-
+        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template <class data_t, class uint_t>
@@ -90,7 +91,7 @@ namespace filter
     }
 
     template <class data_t, class uint_t>
-    void HiPass<data_t, uint_t>::in(const data_t &value)
+    void HiPass<data_t, uint_t>::in(const data_t& value)
     {
         if(m_first_value_offset == 0)
         {

@@ -20,9 +20,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#ifndef LOWPASS_H
-#define LOWPASS_H
-
 /*
  * DESCRIPTION
  * -----------
@@ -41,6 +38,11 @@
  * data_t - Type of the data, the filter will work with
  * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
  */
+
+#ifndef LOWPASS_H
+#define LOWPASS_H
+
+#include <type_traits>
 
 namespace filter
 {
@@ -74,7 +76,7 @@ namespace filter
         m_alpha(alpha),
         m_first_value_offset(++first_value_offset)
     {
-
+        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template <class data_t, class uint_t>

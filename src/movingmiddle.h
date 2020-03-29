@@ -20,9 +20,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#ifndef MOVINGMIDDLE_H
-#define MOVINGMIDDLE_H
-
 /*
  * DESCRIPTION
  * -----------
@@ -58,6 +55,10 @@
  * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
  */
 
+#ifndef MOVINGMIDDLE_H
+#define MOVINGMIDDLE_H
+
+#include <type_traits>
 #include "buffer.h"
 
 namespace filter
@@ -91,6 +92,7 @@ namespace filter
         m_min(data_t()),
         m_max(data_t())
     {
+        static_assert (std::is_unsigned<uint_t>::value, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template<class data_t, class uint_t>
