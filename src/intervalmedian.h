@@ -53,7 +53,10 @@
  * DATA TYPES
  * ----------
  * data_t - Type of the data, the filter will work with
- * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
+ * uint_t - Type of unsigned integers used troughout the class.
+ *          This type should be chosen carefully based on the CPU/MCU for
+ *          optimal performance. A default type of 16-bit unsigned int is
+ *          sufficient for most cases.
  */
 
 #ifndef INTERVALMEDIAN_H
@@ -65,32 +68,34 @@
 namespace filter
 {
     /***********************************************************************/
-    /***************************** Definition ******************************/
+    /***************************** Declaration *****************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t = unsigned short int>
     class IntervalMedian: protected buffer::Buffer<data_t, uint_t>
     {
+            using Buffer = buffer::Buffer<data_t, uint_t>;
+
         public:
             IntervalMedian(data_t *buffer, uint_t buffer_size);
             data_t out();
-            void in(const data_t &value);
+            void in(const data_t& value);
             void reset(data_t *buffer, uint_t buffer_size);
             void reset();
 
-            using buffer::Buffer<data_t, uint_t>::valid;
+            using Buffer::valid;
 
         private:
             data_t m_median;
     };
 
     /***********************************************************************/
-    /***************************** Declaration *****************************/
+    /***************************** Definition ******************************/
     /***********************************************************************/
 
     template<class data_t, class uint_t>
     IntervalMedian<data_t, uint_t>::IntervalMedian(data_t *buffer, uint_t buffer_size):
-        buffer::Buffer<data_t, uint_t>(buffer, buffer_size),
+        Buffer(buffer, buffer_size),
         m_median(data_t())
     {
         static_assert (std::is_unsigned_v<uint_t>, "Template type \"uint_t\" expected to be of unsigned numeric type");
@@ -103,15 +108,15 @@ namespace filter
     }
 
     template<class data_t, class uint_t>
-    void IntervalMedian<data_t, uint_t>::in(const data_t &value)
+    void IntervalMedian<data_t, uint_t>::in(const data_t& value)
     {
-        if(!buffer::Buffer<data_t, uint_t>::valid()) return;
+        if(!Buffer::valid()) return;
 
-        buffer::Buffer<data_t, uint_t>::pushFront(value);
+        Buffer::pushFront(value);
 
-        if(buffer::Buffer<data_t, uint_t>::full())
+        if(Buffer::full())
         {
-            uint_t buffer_size = buffer::Buffer<data_t, uint_t>::size();
+            uint_t buffer_size = Buffer::size();
 
             // 1. Calculate the index of the median
             uint_t middle_index = buffer_size/2;
@@ -123,7 +128,7 @@ namespace filter
             // 2. Loop trough all the elements
             for(uint_t i = 0; i < buffer_size; ++i)
             {
-                data_t cur_element = buffer::Buffer<data_t, uint_t>::at(i);
+                data_t cur_element = Buffer::at(i);
 
                 // 5. To speed up the algirithm, if the element is on the right side of the median, skip all greater elements
                 if(skip_greater_than_found && cur_element >= skip_greater_than) continue;
@@ -139,7 +144,7 @@ namespace filter
                  */
                 for(uint_t j = 0; j < buffer_size; ++j)
                 {
-                    data_t cmp_element = buffer::Buffer<data_t, uint_t>::at(j);
+                    data_t cmp_element = Buffer::at(j);
 
                     if(cmp_element < cur_element)
                     {
@@ -180,7 +185,7 @@ namespace filter
                     }
                 }
             }
-            buffer::Buffer<data_t, uint_t>::clear();
+            Buffer::clear();
         }
     }
 
@@ -188,14 +193,14 @@ namespace filter
     void IntervalMedian<data_t, uint_t>::reset(data_t *buffer, uint_t buffer_size)
     {
         m_median = data_t();
-        buffer::Buffer<data_t, uint_t>::init(buffer, buffer_size);
+        Buffer::init(buffer, buffer_size);
     }
 
     template<class data_t, class uint_t>
     void IntervalMedian<data_t, uint_t>::reset()
     {
         m_median = data_t();
-        buffer::Buffer<data_t, uint_t>::clear();
+        Buffer::clear();
     }
 }
 

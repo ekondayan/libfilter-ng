@@ -22,14 +22,16 @@
  *
  * DESCRIPTION
  * -----------
- * Select the most frequently occured element in the buffer.
+ * Track the number of occurances of each value, then select the most
+ * frequently occured. This filter works best for stable signal values.
+ * For rapidly changing signals, it is not of much use.
  *
  * ALGORITHM
  * ---------
  *
  * PROS
  * ----
-* 1. The returned value is a real value from the buffer
+* 1. The returned value is a real measurement value from the buffer
 * 2. Good for steady signal
 * 3. Removes outliers
  *
@@ -45,7 +47,10 @@
  * DATA TYPES
  * ----------
  * data_t - Type of the data, the filter will work with
- * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
+ * uint_t - Type of unsigned integers used troughout the class.
+ *          This type should be chosen carefully based on the CPU/MCU for
+ *          optimal performance. A default type of 16-bit unsigned int is
+ *          sufficient for most cases.
  */
 
 #ifndef MOVINGMOSTFREQUENTOCCURANCE_H
@@ -57,12 +62,14 @@
 namespace filter
 {
     /***********************************************************************/
-    /***************************** Definition ******************************/
+    /***************************** Declaration *****************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t = unsigned short int>
     class MovingMostFrequentOccurance: protected buffer::Buffer<data_t, uint_t>
     {
+            using Buffer = buffer::Buffer<data_t, uint_t>;
+
         public:
             struct Occurance
             {
@@ -71,25 +78,25 @@ namespace filter
             };
 
         public:
-            MovingMostFrequentOccurance(data_t *buffer, Occurance *occurance_buffer, uint_t buffer_size);
+            MovingMostFrequentOccurance(data_t* buffer, Occurance* occurance_buffer, uint_t buffer_size);
             data_t out();
-            void in(const data_t &value);
-            void reset(data_t *buffer, Occurance *occurance_buffer, uint_t buffer_size);
+            void in(const data_t& value);
+            void reset(data_t* buffer, Occurance* occurance_buffer, uint_t buffer_size);
             void reset();
 
-            using buffer::Buffer<data_t, uint_t>::valid;
+            using Buffer::valid;
 
         private:
-            Occurance *m_occurance_buffer;
+            Occurance* m_occurance_buffer;
     };
 
     /***********************************************************************/
-    /***************************** Declaration *****************************/
+    /***************************** Definition ******************************/
     /***********************************************************************/
 
     template<class data_t, class uint_t>
-    MovingMostFrequentOccurance<data_t, uint_t>::MovingMostFrequentOccurance(data_t *buffer, Occurance *occurance_buffer, uint_t buffer_size):
-        buffer::Buffer<data_t, uint_t>(buffer, buffer_size),
+    MovingMostFrequentOccurance<data_t, uint_t>::MovingMostFrequentOccurance(data_t* buffer, Occurance* occurance_buffer, uint_t buffer_size):
+        Buffer(buffer, buffer_size),
         m_occurance_buffer(occurance_buffer)
     {
         static_assert (std::is_unsigned_v<uint_t>, "Template type \"uint_t\" expected to be of unsigned numeric type");
@@ -98,39 +105,42 @@ namespace filter
     template<class data_t, class uint_t>
     data_t MovingMostFrequentOccurance<data_t, uint_t>::out()
     {
-        if(!m_occurance_buffer || !buffer::Buffer<data_t, uint_t>::valid()) return data_t();
+        if(!m_occurance_buffer || !Buffer::valid())
+            return data_t();
 
         Occurance mfo = m_occurance_buffer[0];
 
-        uint_t buffer_size = buffer::Buffer<data_t, uint_t>::count();
+        uint_t buffer_size = Buffer::count();
         for(uint_t i = 1; i < buffer_size; ++i)
         {
-            if(m_occurance_buffer[i].counter > mfo.counter) mfo = m_occurance_buffer[i];
+            if(m_occurance_buffer[i].counter > mfo.counter)
+                mfo = m_occurance_buffer[i];
         }
 
         return mfo.value;
     }
 
     template<class data_t, class uint_t>
-    void MovingMostFrequentOccurance<data_t, uint_t>::in(const data_t &value)
+    void MovingMostFrequentOccurance<data_t, uint_t>::in(const data_t& value)
     {
-        if(!buffer::Buffer<data_t, uint_t>::valid()) return;
+        if(!Buffer::valid())
+            return;
 
-        uint_t buffer_size= buffer::Buffer<data_t, uint_t>::size();
+        uint_t buffer_size= Buffer::size();
 
-        // If buffer is full, take into account the poped out value
-        if(buffer::Buffer<data_t, uint_t>::full())
+        // If the buffer is full, take into account the poped out value
+        if(Buffer::full())
         {
-            const data_t last = buffer::Buffer<data_t, uint_t>::last();
+            const data_t last = Buffer::last();
 
             // Same value is inserted and poped out, so no action is required because the MFO is not changed
             if(value == last)
             {
-                buffer::Buffer<data_t, uint_t>::pushFront(value);
+                Buffer::pushFront(value);
                 return;
             }
 
-            // Decrease the poped value counter and clear the value it if the number of occurances is 0
+            // Decrease the poped value counter and clear the value if the number of occurances is 0
             for(uint_t i = 0; i < buffer_size; ++i)
             {
                 if(m_occurance_buffer[i].value == last)
@@ -142,7 +152,7 @@ namespace filter
             }
         }
 
-        buffer::Buffer<data_t, uint_t>::pushFront(value);
+        Buffer::pushFront(value);
 
         uint_t index = 0;
         // Find the index of the pushed value or select an empty index
@@ -153,7 +163,8 @@ namespace filter
                 index = i;
                 break;
             }
-            if(m_occurance_buffer[i].counter == 0) index = i;
+            if(m_occurance_buffer[i].counter == 0)
+                index = i;
         }
 
         m_occurance_buffer[index].value = value;
@@ -161,16 +172,16 @@ namespace filter
     }
 
     template<class data_t, class uint_t>
-    void MovingMostFrequentOccurance<data_t, uint_t>::reset(data_t *buffer, Occurance *occurance_buffer, uint_t buffer_size)
+    void MovingMostFrequentOccurance<data_t, uint_t>::reset(data_t* buffer, Occurance* occurance_buffer, uint_t buffer_size)
     {
         m_occurance_buffer = occurance_buffer;
-        buffer::Buffer<data_t, uint_t>::init(buffer, buffer_size);
+        Buffer::init(buffer, buffer_size);
     }
 
     template<class data_t, class uint_t>
     void MovingMostFrequentOccurance<data_t, uint_t>::reset()
     {
-        buffer::Buffer<data_t, uint_t>::clear();
+        Buffer::clear();
     }
 }
 #endif // MOVINGMOSTFREQUENTOCCURANCE_H

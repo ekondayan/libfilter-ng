@@ -22,9 +22,12 @@
  *
  * DESCRIPTION
  * -----------
+ * Attenuates the low frequency components of a spectrum while ‘passing’
+ * the high frequencies within a specified range.
  *
  * ALGORITHM
  * ---------
+ * y[i] := α × y[i−1] + α × (x[i] − x[i−1])
  *
  * PROS
  * ----
@@ -39,7 +42,10 @@
  * DATA TYPES
  * ----------
  * data_t - Type of the data, the filter will work with
- * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
+ * uint_t - Type of unsigned integers used troughout the class.
+ *          This type should be chosen carefully based on the CPU/MCU for
+ *          optimal performance. A default type of 16-bit unsigned int is
+ *          sufficient for most cases.
  */
 
 #ifndef HIPASS_H
@@ -50,7 +56,7 @@
 namespace filter
 {
     /***********************************************************************/
-    /***************************** Definition ******************************/
+    /***************************** Declaration *****************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t = unsigned short int>
@@ -71,7 +77,7 @@ namespace filter
     };
 
     /***********************************************************************/
-    /***************************** Declaration *****************************/
+    /***************************** Definition ******************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t>

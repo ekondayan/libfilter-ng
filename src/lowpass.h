@@ -23,9 +23,12 @@
 /*
  * DESCRIPTION
  * -----------
+ * Attenuates the high frequency components of a spectrum while ‘passing’
+ * the low frequencies within a specified range.
  *
  * ALGORITHM
  * ---------
+ * y[i] := α * x[i] + (1-α) * y[i-1]
  *
  * PROS
  * ----
@@ -36,7 +39,10 @@
  * DATA TYPES
  * ----------
  * data_t - Type of the data, the filter will work with
- * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
+ * uint_t - Type of unsigned integers used troughout the class.
+ *          This type should be chosen carefully based on the CPU/MCU for
+ *          optimal performance. A default type of 16-bit unsigned int is
+ *          sufficient for most cases.
  */
 
 #ifndef LOWPASS_H
@@ -47,7 +53,7 @@
 namespace filter
 {
     /***********************************************************************/
-    /***************************** Definition ******************************/
+    /***************************** Declaration *****************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t = unsigned short int>
@@ -56,7 +62,7 @@ namespace filter
         public:
             LowPass(float alpha, uint_t first_value_offset = 0);
             data_t out();
-            void in(const data_t &value);
+            void in(const data_t& value);
             void reset(float alpha, uint_t first_value_offset);
             void reset();
 
@@ -67,7 +73,7 @@ namespace filter
     };
 
     /***********************************************************************/
-    /***************************** Declaration *****************************/
+    /***************************** Definition ******************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t>
@@ -86,7 +92,7 @@ namespace filter
     }
 
     template <class data_t, class uint_t>
-    void LowPass<data_t, uint_t>::in(const data_t &value)
+    void LowPass<data_t, uint_t>::in(const data_t& value)
     {
         if(m_first_value_offset == 0) m_lowpass = m_lowpass + m_alpha * (value - m_lowpass); //Refactored from [m_alpha * value + (1.0F - m_alpha) * m_lowpass]
         else

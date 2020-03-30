@@ -49,7 +49,10 @@
  * DATA TYPES
  * ----------
  * data_t - Type of the data, the filter will work with
- * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
+ * uint_t - Type of unsigned integers used troughout the class.
+ *          This type should be chosen carefully based on the CPU/MCU for
+ *          optimal performance. A default type of 16-bit unsigned int is
+ *          sufficient for most cases.
  */
 
 #ifndef MOVINGAVERAGEKAUFMAN_H
@@ -61,23 +64,25 @@
 namespace filter
 {
     /***********************************************************************/
-    /***************************** Definition ******************************/
+    /***************************** Declaration *****************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t = unsigned short int>
     class MovingAverageKaufman: protected buffer::Buffer<data_t, uint_t>
     {
+            using Buffer = buffer::Buffer<data_t, uint_t>;
+
         public:
             MovingAverageKaufman(data_t *buffer, uint_t buffer_size, uint_t er_periods, uint_t slow_periods, uint_t fast_periods);
             data_t out();
-            void in(const data_t &value);
+            void in(const data_t& value);
             void reset(data_t *buffer, uint_t buffer_size, uint_t er_periods, uint_t slow_periods, uint_t fast_periods);
             void reset();
 
-            using buffer::Buffer<data_t, uint_t>::valid;
+            using Buffer::valid;
 
         private:
-            data_t abs(const data_t &value);
+            data_t abs(const data_t& value);
 
         private:
             uint_t m_er_periods;
@@ -87,12 +92,12 @@ namespace filter
     };
 
     /***********************************************************************/
-    /***************************** Declaration *****************************/
+    /***************************** Definition ******************************/
     /***********************************************************************/
 
     template<class data_t, class uint_t>
     MovingAverageKaufman<data_t, uint_t>::MovingAverageKaufman(data_t *buffer, uint_t buffer_size, uint_t er_periods, uint_t slow_periods, uint_t fast_periods):
-        buffer::Buffer<data_t, uint_t>(buffer, buffer_size),
+        Buffer(buffer, buffer_size),
         m_er_periods(er_periods),
         m_slow_periods(slow_periods),
         m_fast_periods(fast_periods),
@@ -105,28 +110,28 @@ namespace filter
     data_t MovingAverageKaufman<data_t, uint_t>::out()
     {
         // TODO: Not correct
-        if(!buffer::Buffer<data_t, uint_t>::full()) return data_t();
+        if(!Buffer::full()) return data_t();
 
-        data_t change = abs(buffer::Buffer<data_t, uint_t>::first() - buffer::Buffer<data_t, uint_t>::at(m_er_periods));
+        data_t change = abs(Buffer::first() - Buffer::at(m_er_periods));
 
         // TODO: The for loop can be eliminated if this calculation is moved to the in() method
         data_t volatility = data_t();
-        for(uint_t i = 0; i < m_er_periods; ++i) volatility += abs(buffer::Buffer<data_t, uint_t>::at(i) - buffer::Buffer<data_t, uint_t>::at(i+1));
+        for(uint_t i = 0; i < m_er_periods; ++i) volatility += abs(Buffer::at(i) - Buffer::at(i+1));
 
         data_t er = (volatility == 0)? 0 : (change / volatility);
 
         data_t sc = er*( 2.0F/(m_fast_periods + 1) - 2.0F/(m_slow_periods + 1) ) + 2.0F/(m_slow_periods + 1);
         sc *= sc;
 
-        m_kama = sc * (buffer::Buffer<data_t, uint_t>::first() - m_kama) + m_kama;
+        m_kama = sc * (Buffer::first() - m_kama) + m_kama;
 
         return m_kama;
     }
 
     template<class data_t, class uint_t>
-    void MovingAverageKaufman<data_t, uint_t>::in(const data_t &value)
+    void MovingAverageKaufman<data_t, uint_t>::in(const data_t& value)
     {
-        buffer::Buffer<data_t, uint_t>::pushFront(value);
+        Buffer::pushFront(value);
     }
 
     template<class data_t, class uint_t>
@@ -136,17 +141,17 @@ namespace filter
         m_slow_periods = slow_periods;
         m_fast_periods = fast_periods;
 
-        buffer::Buffer<data_t, uint_t>::init(buffer, buffer_size);
+        Buffer::init(buffer, buffer_size);
     }
 
     template<class data_t, class uint_t>
     void MovingAverageKaufman<data_t, uint_t>::reset()
     {
-        buffer::Buffer<data_t, uint_t>::clear();
+        Buffer::clear();
     }
 
     template<class data_t, class uint_t>
-    data_t MovingAverageKaufman<data_t, uint_t>::abs(const data_t &value)
+    data_t MovingAverageKaufman<data_t, uint_t>::abs(const data_t& value)
     {
         if(value<0) return -value;
         return value;

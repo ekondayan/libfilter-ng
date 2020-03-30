@@ -48,7 +48,9 @@
  * ----------
  * data_t - Type of the data the buffer will work with
  * uint_t - Type of unsigned integers used troughout the class.
- *          This type should be chosen carefully based on the CPU/MCU for optimal performance.
+ *          This type should be chosen carefully based on the CPU/MCU for
+ *          optimal performance. A default type of 16-bit unsigned int is
+ *          sufficient for most cases.
  */
 
 #ifndef BUFFER_H
@@ -59,16 +61,18 @@
 
 namespace buffer
 {
-    // CONFIGURATION PARAMETERS
+    /***********************************************************************/
+    /******************** CONFIGURATION PARAMETERS *************************/
+    /***********************************************************************/
 
     /* Enable/Disable exceptions throwing from the constructor. For some MCU
      * this may be expensive operation. If you disable the exceptions, you
-     * will have to manually check if the buffer object is valid
+     * will have to manually check if the buffer or filter object is valid.
      */
     constexpr bool use_exceptions = false;
 
     /***********************************************************************/
-    /***************************** Definition ******************************/
+    /***************************** Declaration *****************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t = unsigned short int> class Buffer
@@ -111,7 +115,7 @@ namespace buffer
     };
 
     /***********************************************************************/
-    /***************************** Declaration *****************************/
+    /***************************** Definition ******************************/
     /***********************************************************************/
 
     template<class data_t, class uint_t>
@@ -208,7 +212,7 @@ namespace buffer
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::pushFront(const data_t &value)
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::pushFront(const data_t& value)
     {
         if(m_buffer == nullptr)
             return *this;
@@ -408,14 +412,14 @@ namespace buffer
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::operator<<(const data_t &value)
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::operator<<(const data_t& value)
     {
         pushFront(value);
         return *this;
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t> &Buffer<data_t, uint_t>::operator>>(data_t &value)
+    Buffer<data_t, uint_t>& Buffer<data_t, uint_t>::operator>>(data_t& value)
     {
         popBack(value);
         return *this;

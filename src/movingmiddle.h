@@ -37,7 +37,7 @@
  *
  * PROS
  * ----
- * 1. The returned value is a value from the buffer
+ * 1. The returned value is a real measurement value from the buffer
  * 2. Dampens outliers
  *
  * CONS
@@ -52,7 +52,10 @@
  * DATA TYPES
  * ----------
  * data_t - Type of the data, the filter will work with
- * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
+ * uint_t - Type of unsigned integers used troughout the class.
+ *          This type should be chosen carefully based on the CPU/MCU for
+ *          optimal performance. A default type of 16-bit unsigned int is
+ *          sufficient for most cases.
  */
 
 #ifndef MOVINGMIDDLE_H
@@ -64,20 +67,22 @@
 namespace filter
 {
     /***********************************************************************/
-    /***************************** Definition ******************************/
+    /***************************** Declaration *****************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t = unsigned short int>
     class MovingMiddle: protected buffer::Buffer<data_t, uint_t>
     {
+            using Buffer = buffer::Buffer<data_t, uint_t>;
+
         public:
             MovingMiddle(data_t *buffer, uint_t buffer_size);
             data_t out();
-            void in(const data_t &value);
+            void in(const data_t& value);
             void reset(data_t *buffer, uint_t buffer_size);
             void reset();
 
-            using buffer::Buffer<data_t, uint_t>::valid;
+            using Buffer::valid;
 
         private:
             data_t m_min;
@@ -85,12 +90,12 @@ namespace filter
     };
 
     /***********************************************************************/
-    /***************************** Declaration *****************************/
+    /***************************** Definition ******************************/
     /***********************************************************************/
 
     template<class data_t, class uint_t>
     MovingMiddle<data_t, uint_t>::MovingMiddle(data_t *buffer, uint_t buffer_size):
-        buffer::Buffer<data_t, uint_t>(buffer, buffer_size),
+        Buffer(buffer, buffer_size),
         m_min(data_t()),
         m_max(data_t())
     {
@@ -101,21 +106,21 @@ namespace filter
     data_t MovingMiddle<data_t, uint_t>::out()
     {
         // There should be at least two elements to calculate the middle element
-        if(buffer::Buffer<data_t, uint_t>::count() < 2) return data_t();
+        if(Buffer::count() < 2) return data_t();
 
         // Calculate the aritmetic middle
         const data_t middle = m_min + ((m_max - m_min) / 2.0F);
 
         // Clear the prevoius middle value and set it to the first element
-        data_t element = buffer::Buffer<data_t, uint_t>::first();
+        data_t element = Buffer::first();
 
         // Calculate the aritmetic distance of the element to the middle value
         data_t element_to_middle_dist = (middle > element?middle-element:element-middle);
 
         // Find the value with the minimum distance to the middle value
-        for(uint_t i = 1; i<buffer::Buffer<data_t, uint_t>::count(); ++i)
+        for(uint_t i = 1; i<Buffer::count(); ++i)
         {
-            data_t current = buffer::Buffer<data_t, uint_t>::at(i);
+            data_t current = Buffer::at(i);
             data_t cur_to_middle_dist = (middle > current?middle-current:current-middle);
 
             // Save the element if the distance is closer than the previous one
@@ -130,16 +135,16 @@ namespace filter
     }
 
     template<class data_t, class uint_t>
-    void MovingMiddle<data_t, uint_t>::in(const data_t &value)
+    void MovingMiddle<data_t, uint_t>::in(const data_t& value)
     {
-        if(!buffer::Buffer<data_t, uint_t>::valid()) return;
+        if(!Buffer::valid()) return;
 
         // When the buffer is full take into account the poped value
-        if(buffer::Buffer<data_t, uint_t>::full())
+        if(Buffer::full())
         {
-            const data_t last = buffer::Buffer<data_t, uint_t>::last();
+            const data_t last = Buffer::last();
 
-            buffer::Buffer<data_t, uint_t>::pushFront(value);
+            Buffer::pushFront(value);
 
             // Same value is inserted and poped out, so no action is required because the middle is not changed
             if(value == last) return;
@@ -151,12 +156,12 @@ namespace filter
             else if(last == m_min || last == m_max)
             {
                 // Set initial value for the min and max
-                m_min = buffer::Buffer<data_t, uint_t>::first();
+                m_min = Buffer::first();
                 m_max = m_min;
-                uint_t buffer_count = buffer::Buffer<data_t, uint_t>::count();
+                uint_t buffer_count = Buffer::count();
                 for(uint_t i = 1; i < buffer_count; ++i)
                 {
-                    data_t current = buffer::Buffer<data_t, uint_t>::at(i);
+                    data_t current = Buffer::at(i);
                     if(current < m_min) m_min = current;
                     else if(current > m_max) m_max = current;
                 }
@@ -169,10 +174,10 @@ namespace filter
         // Buffer is not full, thus the min and max valuer are calculated using a simple compare operation
         else
         {
-            buffer::Buffer<data_t, uint_t>::pushFront(value);
+            Buffer::pushFront(value);
 
             // Set initial values for the min and max
-            if(buffer::Buffer<data_t, uint_t>::count() == 1) m_min = m_max = value;
+            if(Buffer::count() == 1) m_min = m_max = value;
             else if(value < m_min) m_min = value;
             else if(value > m_max) m_max = value;
         }
@@ -183,7 +188,7 @@ namespace filter
     {
         m_min = data_t();
         m_max = data_t();
-        buffer::Buffer<data_t, uint_t>::init(buffer, buffer_size);
+        Buffer::init(buffer, buffer_size);
     }
 
     template<class data_t, class uint_t>
@@ -191,7 +196,7 @@ namespace filter
     {
         m_min = data_t();
         m_max = data_t();
-        buffer::Buffer<data_t, uint_t>::clear();
+        Buffer::clear();
     }
 }
 

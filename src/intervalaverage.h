@@ -39,7 +39,10 @@
  * DATA TYPES
  * ----------
  * data_t - Type of the data, the filter will work with
- * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
+ * uint_t - Type of unsigned integers used troughout the class.
+ *          This type should be chosen carefully based on the CPU/MCU for
+ *          optimal performance. A default type of 16-bit unsigned int is
+ *          sufficient for most cases.
  */
 
 #ifndef INTERVALAVERAGE_H
@@ -50,7 +53,7 @@
 namespace filter
 {
     /***********************************************************************/
-    /***************************** Definition ******************************/
+    /***************************** Declaration *****************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t = unsigned short int>
@@ -59,7 +62,7 @@ namespace filter
         public:
             IntervalAverage(uint_t interval);
             data_t out();
-            void in(const data_t &value);
+            void in(const data_t& value);
             void reset(uint_t interval);
             void reset();
 
@@ -68,11 +71,10 @@ namespace filter
             data_t m_avg;
             uint_t m_interval;
             uint_t m_count;
-
     };
 
     /***********************************************************************/
-    /***************************** Declaration *****************************/
+    /***************************** Definition ******************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t>
@@ -82,7 +84,7 @@ namespace filter
         m_interval(interval),
         m_count(0)
     {
-        static_assert (std::is_unsigned_v<uint_t>, "");
+        static_assert (std::is_unsigned_v<uint_t>, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template <class data_t, class uint_t>
@@ -92,7 +94,7 @@ namespace filter
     }
 
     template<class data_t, class uint_t>
-    void IntervalAverage<data_t, uint_t>::in(const data_t &value)
+    void IntervalAverage<data_t, uint_t>::in(const data_t& value)
     {
         m_sum += value;
         ++m_count;

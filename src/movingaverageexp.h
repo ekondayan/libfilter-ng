@@ -51,7 +51,10 @@
  * DATA TYPES
  * ----------
  * data_t - Type of the value
- * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
+ * uint_t - Type of unsigned integers used troughout the class.
+ *          This type should be chosen carefully based on the CPU/MCU for
+ *          optimal performance. A default type of 16-bit unsigned int is
+ *          sufficient for most cases.
  */
 
 #ifndef MOVINGAVERAGEEXP_H
@@ -62,7 +65,7 @@
 namespace filter
 {
     /***********************************************************************/
-    /***************************** Definition ******************************/
+    /***************************** Declaration *****************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t = unsigned short int>
@@ -71,7 +74,7 @@ namespace filter
         public:
             ExpMovingAverage(uint_t periods, uint_t first_value_offset = 0);
             data_t out();
-            void in(const data_t &value);
+            void in(const data_t& value);
             void reset(uint_t periods, uint_t first_value_offset = 0);
             void reset();
 
@@ -82,7 +85,7 @@ namespace filter
     };
 
     /***********************************************************************/
-    /***************************** Declaration *****************************/
+    /***************************** Definition ******************************/
     /***********************************************************************/
 
     template<class data_t, class uint_t>
@@ -101,7 +104,7 @@ namespace filter
     }
 
     template<class data_t, class uint_t>
-    void ExpMovingAverage<data_t, uint_t>::in(const data_t &value)
+    void ExpMovingAverage<data_t, uint_t>::in(const data_t& value)
     {
         if(m_first_value_offset == 0) m_ema = m_alpha * (value - m_ema) + m_ema;
         else

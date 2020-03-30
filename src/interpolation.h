@@ -39,7 +39,10 @@
  * DATA TYPES
  * ----------
  * data_t - Type of the data, the filter will work with
- * uint_t - Type of unsigned integers used. This type should be chosen carefully based on the CPU/MCU for optimal performance.
+ * uint_t - Type of unsigned integers used troughout the class.
+ *          This type should be chosen carefully based on the CPU/MCU for
+ *          optimal performance. A default type of 16-bit unsigned int is
+ *          sufficient for most cases.
  */
 
 #ifndef INTERPOLATION_H
@@ -50,7 +53,7 @@
 namespace filter
 {
     /***********************************************************************/
-    /***************************** Definition ******************************/
+    /***************************** Declaration *****************************/
     /***********************************************************************/
 
     template <class data_t, class uint_t = unsigned short int>
@@ -66,7 +69,7 @@ namespace filter
         public:
             Interpolation(InterpolationPoint *interpolation_point, uint_t size = 0);
             data_t out();
-            void in(const data_t &value);
+            void in(const data_t& value);
             void reset(InterpolationPoint *interpolation_points, uint_t size);
             void reset();
             void setPoint(uint_t index, data_t real_value, data_t measured_value);
@@ -78,7 +81,7 @@ namespace filter
     };
 
     /***********************************************************************/
-    /***************************** Declaration *****************************/
+    /***************************** Definition ******************************/
     /***********************************************************************/
 
     template<class data_t, class uint_t>
@@ -87,7 +90,7 @@ namespace filter
         m_interpolation_point_size(size),
         m_raw_value(data_t())
     {
-        static_assert (std::is_unsigned_v<uint_t>, "");
+        static_assert (std::is_unsigned_v<uint_t>, "Template type \"uint_t\" expected to be of unsigned numeric type");
     }
 
     template<class data_t, class uint_t>
@@ -128,7 +131,7 @@ namespace filter
     }
 
     template<class data_t, class uint_t>
-    void Interpolation<data_t, uint_t>::in(const data_t &value)
+    void Interpolation<data_t, uint_t>::in(const data_t& value)
     {
         m_raw_value = value;
     }
