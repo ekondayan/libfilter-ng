@@ -94,7 +94,8 @@ namespace filter
     template <class data_t, class uint_t>
     void LowPass<data_t, uint_t>::in(const data_t& value)
     {
-        if(m_first_value_offset == 0) m_lowpass = m_lowpass + m_alpha * (value - m_lowpass); //Refactored from [m_alpha * value + (1.0F - m_alpha) * m_lowpass]
+        if(m_first_value_offset == 0)
+            m_lowpass = m_lowpass + m_alpha * (value - m_lowpass); //Refactored from [m_alpha * value + (1.0F - m_alpha) * m_lowpass]
         else
         {
             --m_first_value_offset;

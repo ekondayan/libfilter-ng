@@ -28,7 +28,7 @@
 #include "movingaveragekaufman.h"
 #include "movingaverageweighted.h"
 #include "movingmedian.h"
-#include "movingmostfrequentoccurance.h"
+#include "movingmostfrequentoccurrence.h"
 #include "movingmiddle.h"
 #include "lowpass.h"
 #include "hipass.h"
