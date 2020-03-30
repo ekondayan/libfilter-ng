@@ -1,13 +1,13 @@
 /*
- * 
- *  _   _   _        __   _   _   _                                         
- * | | (_) | |__    / _| (_) | | | |_    ___   _ __           _ __     __ _ 
+ *
+ *  _   _   _        __   _   _   _
+ * | | (_) | |__    / _| (_) | | | |_    ___   _ __           _ __     __ _
  * | | | | | '_ \  | |_  | | | | | __|  / _ \ | '__|  _____  | '_ \   / _` |
  * | | | | | |_) | |  _| | | | | | |_  |  __/ | |    |_____| | | | | | (_| |
  * |_| |_| |_.__/  |_|   |_| |_|  \__|  \___| |_|            |_| |_|  \__, |
- *                                                                    |___/ 
+ *                                                                    |___/
  *
- * A self contained, header only library providing a set of filters 
+ * A self contained, header only library providing a set of filters
  * written in C++ with efficiency in mind
  *
  * Version: 1.0.0
@@ -110,7 +110,8 @@ namespace filter
     data_t MovingAverageKaufman<data_t, uint_t>::out()
     {
         // TODO: Not correct
-        if(!Buffer::full()) return data_t();
+        if(!Buffer::full())
+            return data_t();
 
         data_t change = abs(Buffer::first() - Buffer::at(m_er_periods));
 
@@ -153,7 +154,19 @@ namespace filter
     template<class data_t, class uint_t>
     data_t MovingAverageKaufman<data_t, uint_t>::abs(const data_t& value)
     {
-        if(value<0) return -value;
+        if constexpr(std::is_integral_v<data_t> && std::is_unsigned_v<data_t>)
+        {
+            return value;
+        }
+        if constexpr(std::is_integral_v<data_t> && std::is_signed_v<data_t>)
+        {
+            const data_t mask = value >> (sizeof(data_t) * 8 - 1);
+            return (value + mask) ^ mask;
+        }
+
+        if(value < 0)
+            return -value;
+
         return value;
     }
 
