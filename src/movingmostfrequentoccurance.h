@@ -38,7 +38,6 @@
  * CONS
  * ----
  * 1. Slow
- * 2. The output from a changing signal looks like a stair case
  *
  * TYPE
  * ----

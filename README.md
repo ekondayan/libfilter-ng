@@ -4,9 +4,7 @@
 
 # Description
 
-The library provides a set of signal filters: High Pass, Low Pass, Moving Average, Moving Average Kaufman, Weighted Moving Average, Moving Median, Interval Average, Interval Median, Interpolation.
-
-There two filters: Most Frequent Occurrence and Moving Middle; that are my own custom design and I will explain them in more details later on. 
+The library provides a set of signal filters: High Pass, Low Pass, Moving Average, Moving Average Kaufman, Weighted Moving Average, Moving Median, Interval Average, Interval Median, Interpolation, Moving Most Frequent Occurrence and Moving Middle.
 
 There is also an implementation of a very efficient and self contained Circular Buffer.
 
@@ -90,8 +88,6 @@ float result = mov_med.out();
 
 ## Interpolation
 
-
-
 ## Low Pass
 
 Passes the low frequency part of the signal and attenuates the high frequency part of the signal
@@ -156,11 +152,35 @@ float result = mfo.out();
 
 ## Moving Middle
 
-Takes the minimum and maximum values in the buffer, then calculates the arithmetic middle and selects the closes value from the buffer.
+Takes the minimum and maximum values in the buffer, then calculates the arithmetic middle and selects the closest value from the buffer.
 
+Example:
 
+- Allocate memory for the circular buffer
 
+```c++
+float buff_mm[4] = {0.0f};
+```
 
+- Create the object. The template parameter is the type of the values the filter will work with. The first argument to the constructor is a pointer to the allocated memory. The second is the size of the buffer
+
+```c++
+filter::MovingMiddle<float> mm(buf_mm, 4);
+```
+
+- Feed the filter
+
+```
+mm.in(2.0);
+mm.in(2.2);
+mm.in(3.0);
+```
+
+- Get the filtered value
+
+```c++
+float result = mm.out();
+```
 
 
 
