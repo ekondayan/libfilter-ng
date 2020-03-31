@@ -8,7 +8,7 @@
  *                                                                    |___/ 
  *
  * A self contained, header only library providing a set of filters 
- * written in C++ with efficiency in mind
+ * written in C++17 with efficiency in mind
  *
  * Version: 1.0.0
  * URL: https://github.com/ekondayan/libfilter-ng.git

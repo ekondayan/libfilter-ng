@@ -8,7 +8,7 @@
  *                                                                    |___/ 
  *
  * A self contained, header only library providing a set of filters 
- * written in C++ with efficiency in mind
+ * written in C++17 with efficiency in mind
  *
  * Version: 1.0.0
  * URL: https://github.com/ekondayan/libfilter-ng.git
@@ -106,7 +106,8 @@ namespace filter
     data_t MovingMiddle<data_t, uint_t>::out()
     {
         // There should be at least two elements to calculate the middle element
-        if(Buffer::count() < 2) return data_t();
+        if(Buffer::count() < 2)
+            return data_t();
 
         // Calculate the aritmetic middle
         const data_t middle = m_min + ((m_max - m_min) / 2.0F);
@@ -137,7 +138,8 @@ namespace filter
     template<class data_t, class uint_t>
     void MovingMiddle<data_t, uint_t>::in(const data_t& value)
     {
-        if(!Buffer::valid()) return;
+        if(!Buffer::valid())
+            return;
 
         // When the buffer is full take into account the poped value
         if(Buffer::full())
@@ -177,9 +179,12 @@ namespace filter
             Buffer::pushFront(value);
 
             // Set initial values for the min and max
-            if(Buffer::count() == 1) m_min = m_max = value;
-            else if(value < m_min) m_min = value;
-            else if(value > m_max) m_max = value;
+            if(Buffer::count() == 1)
+                m_min = m_max = value;
+            else if(value < m_min)
+                m_min = value;
+            else if(value > m_max)
+                m_max = value;
         }
     }
 

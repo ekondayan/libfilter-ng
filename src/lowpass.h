@@ -8,7 +8,7 @@
  *                                                                    |___/ 
  *
  * A self contained, header only library providing a set of filters 
- * written in C++ with efficiency in mind
+ * written in C++17 with efficiency in mind
  *
  * Version: 1.0.0
  * URL: https://github.com/ekondayan/libfilter-ng.git
@@ -60,6 +60,11 @@ namespace filter
     class LowPass
     {
         public:
+            /**
+             * @brief LowPass Filter constructor
+             * @param alpha Alpha coefficient
+             * @param first_value_offset Skip first N values
+             */
             LowPass(float alpha, uint_t first_value_offset = 0);
             data_t out();
             void in(const data_t& value);

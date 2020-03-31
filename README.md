@@ -82,30 +82,6 @@ float result = mov_med.out();
 
 # Filters
 
-## Interval Median
-
-## Interval Average
-
-## Interpolation
-
-## Low Pass
-
-Passes the low frequency part of the signal and attenuates the high frequency part of the signal
-
-## High Pass
-
-Passes the high frequency part of the signal and attenuates the low frequency part of the signal
-
-## Moving Average
-
-## Moving Exponential Average
-
-## Moving Weighted Average
-
-## Moving Kaufman Average
-
-## Moving Median
-
 ## Moving Most Frequent Occurrence
 
 Keeps track of the number of times a value shows in the buffer or in other words - the frequency of occurrence of each vale.
@@ -182,6 +158,28 @@ mm.in(3.0);
 float result = mm.out();
 ```
 
+## Interval Median
 
+## Interval Average
+
+## Interpolation
+
+## Low Pass
+
+Passes the low frequency part of the signal and attenuates the high frequency part of the signal
+
+## High Pass
+
+Passes the high frequency part of the signal and attenuates the low frequency part of the signal
+
+## Moving Average
+
+## Moving Exponential Average
+
+## Moving Weighted Average
+
+## Moving Kaufman Average
+
+## Moving Median
 
 
