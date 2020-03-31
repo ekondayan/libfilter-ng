@@ -102,8 +102,6 @@ namespace filter
     {
         uint_t buffer_count = Buffer::count();
 
-        if(buffer_count < 3) return data_t();
-
         // 1. Calculate the index of the median
         uint_t middle_index = buffer_count/2;
         data_t median_element;

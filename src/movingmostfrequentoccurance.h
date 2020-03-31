@@ -123,7 +123,7 @@ namespace filter
     template<class data_t, class uint_t>
     void MovingMostFrequentOccurrence<data_t, uint_t>::in(const data_t& value)
     {
-        if(!Buffer::valid())
+        if(!m_occurrence_buffer || !Buffer::valid())
             return;
 
         uint_t buffer_size= Buffer::size();
@@ -146,7 +146,8 @@ namespace filter
                 if(m_occurrence_buffer[i].value == last)
                 {
                     --m_occurrence_buffer[i].counter;
-                    if(m_occurrence_buffer[i].counter == 0) m_occurrence_buffer[i].value = data_t();
+                    if(m_occurrence_buffer[i].counter == 0)
+                        m_occurrence_buffer[i].value = data_t();
                     break;
                 }
             }

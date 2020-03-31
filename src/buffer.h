@@ -22,10 +22,10 @@
  *
  * DESCRIPTION
  * -----------
- * Circular buffer optimized for speed. Pushing, poping and rotating use cheap
- * aritmetic operations, no modulus operator or conditional branching. For this
+ * Circular buffer optimized for speed. Pushing, popping and rotating use cheap
+ * arithmetic operations, no modulus operator or conditional branching. For this
  * to be achieved the buffer size must be a power of two(2, 4, 8, 16, 32, ...).
- * Since this is circular buffer the real size is allways: the set value minus one. One element is
+ * Since this is circular buffer the real size is always the set value minus one. One element is
  * wasted for the head pointer. For example if you set the buffer size to 16 elements,
  * then the real size if 15 elements.
  * The buffer algorithms are self contained and do not use external dependencies. This
@@ -79,6 +79,13 @@ namespace buffer
     {
         public:
             Buffer();
+            /**
+             * @brief Buffer Construct a circular buffer object
+             * @param buffer Pointer to the allocated memory for the buffer
+             * @param size The number of elements in the buffer
+             * @param safe_erase If set the whole buffer will be overwritten
+             *                   with empty values
+             */
             Buffer(data_t* buffer, uint_t size, bool safe_erase = false);
             ~Buffer();
 
@@ -88,7 +95,7 @@ namespace buffer
             inline Buffer& popFront(data_t* value = nullptr);
             inline Buffer& popBack(data_t* value = nullptr);
             inline Buffer& clear();
-            inline Buffer* getPtr();
+            inline Buffer* getRawPtr();
             inline bool full();
             inline bool empty();
             inline bool valid();
@@ -134,11 +141,15 @@ namespace buffer
         m_buffer(nullptr),
         m_safe_erase(safe_erase)
     {
+        // Buffer size of size smaller than 4 doesn't make sense. Sizes of
+        // 1 and 3 are not power of two. Size of 2 means the real buffer
+        // size will be 1 element. Buffer with 1 element is not buffer at all,
+        // so values less than 3 doesn't make sense.
         if(size <= 3)
         {
             if constexpr(use_exceptions)
             {
-                throw std::invalid_argument("Size of the buffer must be greater than 3");
+                throw std::invalid_argument("Size of the buffer must be at least 4");
             }
             else
             {
@@ -146,6 +157,7 @@ namespace buffer
             }
         }
 
+        // Test if the buffer size is a power of two
         if(size & (size - 1))
         {
             if constexpr(use_exceptions)
@@ -174,7 +186,7 @@ namespace buffer
     }
 
     template<class data_t, class uint_t>
-    Buffer<data_t, uint_t>* Buffer<data_t, uint_t>::getPtr()
+    Buffer<data_t, uint_t>* Buffer<data_t, uint_t>::getRawPtr()
     {
         return m_buffer;
     }
@@ -387,7 +399,7 @@ namespace buffer
     template<class data_t, class uint_t>
     void Buffer<data_t, uint_t>::copyToArray(data_t* array, uint_t start, uint_t count)
     {
-        // Pointers must be set
+        // Pointers must be valid
         if(m_buffer == nullptr || array == nullptr)
             return;
         // Buffer must not be empty
