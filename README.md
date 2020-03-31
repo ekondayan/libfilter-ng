@@ -48,7 +48,7 @@ float result = low_pass.out();
 
 The Low Pass and High Pass are one of the simplest filters, because internally they work only with the new value and the last result. 
 
-On the other hand there are filters that work on a sequence of input values and for that reason they require a storage place. The library implements a self contained and efficient Circular Buffer. Contrary to what you might be thinking, the Circular Buffer object does not manage the memory itself. The memory management is your responsibility. 
+On the other hand there are filters that work on a sequence of input values and for that reason they require a FILO storage buffer. The library implements a self contained and efficient Circular Buffer. Contrary to what you might be thinking, the Circular Buffer object does not manage the memory itself. The memory management is your responsibility. 
 
 To create a Circular Buffer object, you have to pass a pointer to the pre allocated memory. This decision was made, because different scenarios require different memory management. For example, if you are developing for a MCU, you may prefer the memory to be statically allocated. Or if you are developing for a desktop, you may prefer to dynamically allocate space on the heap. If for some reason you prefer to use the stack, you can do it and the library will not stand in your way.
 
@@ -65,7 +65,7 @@ float buff_mov_med[4] = {0.0f};
 - Create the Median Filter object. The template parameter is the type of the values the filter will work with. The first argument to the constructor is a pointer to the allocated memory. The second is the size of the buffer
 
 ```c++
-filter::MovingMedian<float> mov_med(buff_mov_med, 4)
+filter::MovingMedian<float> mov_med(buff_mov_med, 4);
 ```
 
 - Feed the filter. Calculating the median requires at least 3 values
@@ -73,7 +73,7 @@ filter::MovingMedian<float> mov_med(buff_mov_med, 4)
 ```
 mov_med.in(2.0);
 mov_med.in(2.5);
-mov_med.in(3);
+mov_med.in(3.0);
 ```
 
 - Get the filtered value
@@ -114,9 +114,49 @@ Passes the high frequency part of the signal and attenuates the low frequency pa
 
 Keeps track of the number of times a value shows in the buffer or in other words - the frequency of occurrence of each vale.
 
+This filter require two memory buffers:
+
+- one for the signal values themselves
+
+- another for keeping track of the values and their occurrences
+
+Example:
+
+- Allocate memory for the circular buffer
+
+```c++
+float buff_mfo[4] = {0.0f};
+```
+
+- Allocate memory for the second buffer
+
+```c++
+filter::MovingMostFrequentOccurrence<float>::Occurrence buf_occ_mfo[4];
+```
+
+- Create the object. The template parameter is the type of the values the filter will work with. The first argument to the constructor is a pointer to the allocated memory. The second is the size of the buffer
+
+```c++
+filter::MovingMostFrequentOccurrence<float> mfo(buf_mfo, buf_occ_mfo, 4);
+```
+
+- Feed the filter. Calculating the median requires at least 3 values
+
+```
+mfo.in(2.0);
+mfo.in(2.0);
+mfo.in(3.0);
+```
+
+- Get the filtered value
+
+```c++
+float result = mfo.out();
+```
+
 ## Moving Middle
 
-Takes the minimum and maximum values in the buffer, then calculates the arithmetic middle and selects the closes value in the buffer.
+Takes the minimum and maximum values in the buffer, then calculates the arithmetic middle and selects the closes value from the buffer.
 
 
 
